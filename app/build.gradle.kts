@@ -39,7 +39,7 @@ java {
 }
 
 application {
-    mainClass = "PLACEHOLDER"
+    mainClass = "io.github.docto_rin.tic_tac_toe.Main"
 }
 
 group = "io.github.docto_rin"
