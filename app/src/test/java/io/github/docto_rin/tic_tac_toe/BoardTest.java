@@ -6,7 +6,7 @@ import java.util.Optional;
 
 class BoardTest {
     @Test
-    void testBoardInitialization() {
+    void testBoardIsInitializedWithEmptyCells() {
         Board board = new Board();
         for (int i = 0; i < 3; i++) {
             for (int j = 0; j < 3; j++) {
@@ -16,7 +16,7 @@ class BoardTest {
     }
 
     @Test
-    void testMakeMoveValid() {
+    void testMakeMoveSucceedsWhenCellIsEmpty() {
         Board board = new Board();
         boolean moveResult = board.makeMove(0, 0, Symbol.X);
         assertTrue(moveResult);
@@ -24,7 +24,7 @@ class BoardTest {
     }
 
     @Test
-    void testMakeMoveInvalid() {
+    void testMakeMoveFailsWhenCellIsOccupied() {
         Board board = new Board();
         board.makeMove(0, 0, Symbol.X);
         boolean moveResult = board.makeMove(0, 0, Symbol.O);
@@ -147,10 +147,31 @@ class BoardTest {
     }
 
     @Test
-    void testDisplay() {
+    void testGetDisplayStringContainsSymbol() {
         Board board = new Board();
         board.makeMove(0, 0, Symbol.X);
 
-        board.display();
+        String display = board.getDisplayString();
+        assertNotNull(display);
+        assertTrue(display.contains("X"));
+    }
+
+    @Test
+    void testParseCoordinate() {
+        Board board = new Board();
+
+        Optional<int[]> coord1 = board.parseCoordinate("1a");
+        assertTrue(coord1.isPresent());
+        assertArrayEquals(new int[]{0, 0}, coord1.get());
+
+        Optional<int[]> coord2 = board.parseCoordinate("3b");
+        assertTrue(coord2.isPresent());
+        assertArrayEquals(new int[]{2, 1}, coord2.get());
+
+        Optional<int[]> coord3 = board.parseCoordinate("4a");
+        assertTrue(coord3.isEmpty());
+
+        Optional<int[]> coord4 = board.parseCoordinate("");
+        assertTrue(coord4.isEmpty());
     }
 }
