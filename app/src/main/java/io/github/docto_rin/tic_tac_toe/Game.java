@@ -1,5 +1,6 @@
 package io.github.docto_rin.tic_tac_toe;
 
+import java.io.PrintStream;
 import java.util.Scanner;
 import java.util.Optional;
 
@@ -14,26 +15,25 @@ public class Game {
         currentPlayerIndex = 0;
     }
 
-    public void play() {
-        Scanner scanner = new Scanner(System.in);
+    public void play(Scanner scanner, PrintStream output) {
 
         while (true) {
-            board.display();
+            output.print(board.getDisplayString());
             Player player = players[currentPlayerIndex];
-            System.out.printf("It's %s (%s)'s turn next.%n",
+            output.printf("It's %s (%s)'s turn next.%n",
                 player.getName(),
                 player.getSymbol()
             );
-            
-            System.out.println("Enter coordinate:");
-            String input;
+
+            output.println("Enter coordinate:");
+            String inputStr;
             Optional<int[]> coordinate;
             do {
-                input = scanner.nextLine();
-                
-                coordinate = parseCoordinate(input);
+                inputStr = scanner.nextLine();
+
+                coordinate = board.parseCoordinate(inputStr);
                 if (coordinate.isEmpty()) {
-                    System.out.println("Invalid input. Try again.");
+                    output.println("Invalid input. Try again.");
                     continue;
                 }
 
@@ -41,16 +41,16 @@ public class Game {
                     coordinate.get()[0], coordinate.get()[1], player.getSymbol()
                 );
                 if (!moveResult) {
-                    System.out.printf("The cell (%s) is already occupied. Try again.%n", input);
+                    output.printf("The cell (%s) is already occupied. Try again.%n", inputStr);
                     continue;
                 }
 
                 break;
             } while (true);
-            
+
             if (board.checkWinner().isPresent()) {
-                board.display();
-                System.out.printf("Game! The winner is %s (%s).%n",
+                output.print(board.getDisplayString());
+                output.printf("Game! The winner is %s (%s).%n",
                     player.getName(),
                     player.getSymbol()
                 );
@@ -58,32 +58,12 @@ public class Game {
             }
 
             if (board.isFull()) {
-                board.display();
-                System.out.println("The board is full. It's a draw.");
+                output.print(board.getDisplayString());
+                output.println("The board is full. It's a draw.");
                 break;
             }
 
-            currentPlayerIndex = 1 - currentPlayerIndex;
+            currentPlayerIndex ^= 1;
         }
-
-        scanner.close();
-    }
-
-    Optional<int[]> parseCoordinate(String input) {
-        if (input.length() != 2) {
-            return Optional.empty();
-        }
-
-        char rowChar = input.charAt(0);
-        char colChar = input.charAt(1);
-        
-        int rowIndex = rowChar - '1';
-        int colIndex = colChar - 'a';
-
-        if (rowIndex < 0 || rowIndex >= 3 || colIndex < 0 || colIndex >= 3) {
-            return Optional.empty();
-        }
-
-        return Optional.of(new int[]{rowIndex, colIndex});
     }
 }
