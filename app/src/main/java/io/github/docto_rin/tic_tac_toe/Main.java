@@ -1,5 +1,8 @@
 package io.github.docto_rin.tic_tac_toe;
 
+import io.github.docto_rin.tic_tac_toe.view.BoardView;
+import io.github.docto_rin.tic_tac_toe.view.ConsoleBoardView;
+
 import java.util.Scanner;
 
 public class Main {
@@ -13,11 +16,13 @@ public class Main {
             System.out.print("Enter player 2 name (Symbol: O): ");
             String player2Name = scanner.nextLine();
 
+            BoardView boardView = new ConsoleBoardView(scanner);
             Game game = new Game(
                 new Player(player1Name, Symbol.X),
-                new Player(player2Name, Symbol.O)
+                new Player(player2Name, Symbol.O),
+                boardView
             );
-            game.play(scanner, System.out);
+            game.play();
         }
     }
 }

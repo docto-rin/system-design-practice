@@ -1,5 +1,7 @@
 package io.github.docto_rin.tic_tac_toe;
 
+import io.github.docto_rin.tic_tac_toe.view.BoardView;
+import io.github.docto_rin.tic_tac_toe.view.ConsoleBoardView;
 import org.junit.jupiter.api.Test;
 import static org.junit.jupiter.api.Assertions.*;
 import java.io.ByteArrayInputStream;
@@ -17,11 +19,13 @@ public class GameTest {
         ByteArrayOutputStream out = new ByteArrayOutputStream();
         PrintStream printer = new PrintStream(out);
 
+        BoardView boardView = new ConsoleBoardView(scanner, printer);
         Game game = new Game(
             new Player("Alice", Symbol.X),
-            new Player("Bob", Symbol.O)
+            new Player("Bob", Symbol.O),
+            boardView
         );
-        game.play(scanner, printer);
+        game.play();
 
         String output = out.toString();
         assertTrue(output.contains("Game! The winner is Alice (X)."));
@@ -36,11 +40,13 @@ public class GameTest {
         ByteArrayOutputStream out = new ByteArrayOutputStream();
         PrintStream printer = new PrintStream(out);
 
+        BoardView boardView = new ConsoleBoardView(scanner, printer);
         Game game = new Game(
             new Player("Alice", Symbol.X),
-            new Player("Bob", Symbol.O)
+            new Player("Bob", Symbol.O),
+            boardView
         );
-        game.play(scanner, printer);
+        game.play();
 
         String output = out.toString();
         assertTrue(output.contains("Game! The winner is Bob (O)."));
@@ -55,11 +61,13 @@ public class GameTest {
         ByteArrayOutputStream out = new ByteArrayOutputStream();
         PrintStream printer = new PrintStream(out);
 
+        BoardView boardView = new ConsoleBoardView(scanner, printer);
         Game game = new Game(
             new Player("Alice", Symbol.X),
-            new Player("Bob", Symbol.O)
+            new Player("Bob", Symbol.O),
+            boardView
         );
-        game.play(scanner, printer);
+        game.play();
 
         String output = out.toString();
         assertTrue(output.contains("Game! The winner is Alice (X)."));
@@ -74,11 +82,13 @@ public class GameTest {
         ByteArrayOutputStream out = new ByteArrayOutputStream();
         PrintStream printer = new PrintStream(out);
 
+        BoardView boardView = new ConsoleBoardView(scanner, printer);
         Game game = new Game(
             new Player("Alice", Symbol.X),
-            new Player("Bob", Symbol.O)
+            new Player("Bob", Symbol.O),
+            boardView
         );
-        game.play(scanner, printer);
+        game.play();
 
         String output = out.toString();
         assertTrue(output.contains("The board is full. It's a draw."));
@@ -86,21 +96,23 @@ public class GameTest {
 
     @Test
     void testInvalidInputRejected() {
-        // Invalid input "99" followed by valid game
+        // Invalid input "99" (invalid format) followed by valid game
         String input = "99\n1a\n1b\n2a\n2b\n3a\n";
         ByteArrayInputStream in = new ByteArrayInputStream(input.getBytes());
         Scanner scanner = new Scanner(in);
         ByteArrayOutputStream out = new ByteArrayOutputStream();
         PrintStream printer = new PrintStream(out);
 
+        BoardView boardView = new ConsoleBoardView(scanner, printer);
         Game game = new Game(
             new Player("Alice", Symbol.X),
-            new Player("Bob", Symbol.O)
+            new Player("Bob", Symbol.O),
+            boardView
         );
-        game.play(scanner, printer);
+        game.play();
 
         String output = out.toString();
-        assertTrue(output.contains("Invalid input. Try again."));
+        assertTrue(output.contains("Invalid input format. Try again."));
         assertTrue(output.contains("Game! The winner is Alice (X)."));
     }
 
@@ -113,11 +125,13 @@ public class GameTest {
         ByteArrayOutputStream out = new ByteArrayOutputStream();
         PrintStream printer = new PrintStream(out);
 
+        BoardView boardView = new ConsoleBoardView(scanner, printer);
         Game game = new Game(
             new Player("Alice", Symbol.X),
-            new Player("Bob", Symbol.O)
+            new Player("Bob", Symbol.O),
+            boardView
         );
-        game.play(scanner, printer);
+        game.play();
 
         String output = out.toString();
         assertTrue(output.contains("The cell (1a) is already occupied. Try again."));
@@ -133,19 +147,22 @@ public class GameTest {
         ByteArrayOutputStream out = new ByteArrayOutputStream();
         PrintStream printer = new PrintStream(out);
 
+        BoardView boardView = new ConsoleBoardView(scanner, printer);
         Game game = new Game(
             new Player("Alice", Symbol.X),
-            new Player("Bob", Symbol.O)
+            new Player("Bob", Symbol.O),
+            boardView
         );
-        game.play(scanner, printer);
+        game.play();
 
         String output = out.toString();
-        // Should have 3 "Invalid input" messages
+        // Should have error messages for invalid inputs
+        // All "99", "zz", and "" have invalid format
         int count = 0;
         int index = 0;
-        while ((index = output.indexOf("Invalid input", index)) != -1) {
+        while ((index = output.indexOf("Invalid input format", index)) != -1) {
             count++;
-            index += "Invalid input".length();
+            index += "Invalid input format".length();
         }
         assertTrue(count >= 3);
         assertTrue(output.contains("Game! The winner is Alice (X)."));
@@ -160,11 +177,13 @@ public class GameTest {
         ByteArrayOutputStream out = new ByteArrayOutputStream();
         PrintStream printer = new PrintStream(out);
 
+        BoardView boardView = new ConsoleBoardView(scanner, printer);
         Game game = new Game(
             new Player("Alice", Symbol.X),
-            new Player("Bob", Symbol.O)
+            new Player("Bob", Symbol.O),
+            boardView
         );
-        game.play(scanner, printer);
+        game.play();
 
         String output = out.toString();
         assertTrue(output.contains("It's Alice (X)'s turn next."));
@@ -180,11 +199,13 @@ public class GameTest {
         ByteArrayOutputStream out = new ByteArrayOutputStream();
         PrintStream printer = new PrintStream(out);
 
+        BoardView boardView = new ConsoleBoardView(scanner, printer);
         Game game = new Game(
             new Player("Alice", Symbol.X),
-            new Player("Bob", Symbol.O)
+            new Player("Bob", Symbol.O),
+            boardView
         );
-        game.play(scanner, printer);
+        game.play();
 
         String output = out.toString();
         // Board header should appear multiple times (at least for each turn + final)
@@ -206,11 +227,13 @@ public class GameTest {
         ByteArrayOutputStream out = new ByteArrayOutputStream();
         PrintStream printer = new PrintStream(out);
 
+        BoardView boardView = new ConsoleBoardView(scanner, printer);
         Game game = new Game(
             new Player("Alice", Symbol.X),
-            new Player("Bob", Symbol.O)
+            new Player("Bob", Symbol.O),
+            boardView
         );
-        game.play(scanner, printer);
+        game.play();
 
         String output = out.toString();
         assertTrue(output.contains("Game! The winner is Alice (X)."));

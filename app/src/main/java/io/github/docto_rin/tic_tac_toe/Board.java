@@ -3,47 +3,69 @@ package io.github.docto_rin.tic_tac_toe;
 import java.util.Optional;
 
 /**
- * Represents a 3x3 Tic Tac Toe game board.
+ * Represents a Tic Tac Toe game board.
  *
  * <p>Manages the game grid state, validates moves, checks for winners,
  * and provides display functionality. Uses an emptyCount cache for
  * efficient board fullness checking.
+ *
+ * <p>Supports configurable board sizes (default 3x3).
  */
 public class Board {
-    private static final int BOARD_SIZE = 3;
+    private final int size;
     private Symbol[][] grid;
     private int emptyCount;
 
     public Board() {
-        grid = new Symbol[BOARD_SIZE][BOARD_SIZE];
-        for (int i = 0; i < BOARD_SIZE; i++) {
-            for (int j = 0; j < BOARD_SIZE; j++) {
+        this(3);
+    }
+
+    public Board(int size) {
+        this.size = size;
+        grid = new Symbol[size][size];
+        for (int i = 0; i < size; i++) {
+            for (int j = 0; j < size; j++) {
                 grid[i][j] = Symbol.EMPTY;
             }
         }
 
-        emptyCount = BOARD_SIZE * BOARD_SIZE;
+        emptyCount = size * size;
+    }
+
+    public int getSize() {
+        return size;
+    }
+
+    /**
+     * Validates whether a coordinate is valid for placing a symbol.
+     *
+     * @param row the row index (0 to size-1)
+     * @param col the column index (0 to size-1)
+     * @return {@link MoveResult#SUCCESS} if the coordinate is valid,
+     *         {@link MoveResult#OUT_OF_BOUNDS} if the position is out of bounds,
+     *         {@link MoveResult#CELL_OCCUPIED} if the cell is already occupied
+     */
+    public MoveResult validateCoordinate(int row, int col) {
+        if (!(0 <= row && row < size && 0 <= col && col < size)) {
+            return MoveResult.OUT_OF_BOUNDS;
+        }
+        if (grid[row][col] != Symbol.EMPTY) {
+            return MoveResult.CELL_OCCUPIED;
+        }
+        return MoveResult.SUCCESS;
     }
 
     /**
      * Places a symbol at the specified position on the board.
+     * Assumes the coordinate has been validated.
      *
-     * @param row the row index (0-2)
-     * @param col the column index (0-2)
+     * @param row the row index (0 to size-1)
+     * @param col the column index (0 to size-1)
      * @param symbol the symbol to place (X or O)
-     * @return {@code true} if the move was successful, {@code false} if the
-     *         position is out of bounds or already occupied
      */
-    public boolean makeMove(int row, int col, Symbol symbol) {
-        if (!(0 <= row && row < BOARD_SIZE && 0 <= col && col < BOARD_SIZE)) {
-            return false;
-        }
-        if (grid[row][col] == Symbol.EMPTY) {
-            grid[row][col] = symbol;
-            emptyCount--;
-            return true;
-        }
-        return false;
+    public void putSymbol(int row, int col, Symbol symbol) {
+        grid[row][col] = symbol;
+        emptyCount--;
     }
 
     /**
@@ -63,45 +85,45 @@ public class Board {
      */
     public Optional<Symbol> checkWinner() {
         // check row
-        for (int row = 0; row < BOARD_SIZE; row++) {
-            Symbol[] rowSymbols = new Symbol[BOARD_SIZE];
-            for (int col = 0; col < BOARD_SIZE; col++) {
+        for (int row = 0; row < size; row++) {
+            Symbol[] rowSymbols = new Symbol[size];
+            for (int col = 0; col < size; col++) {
                 rowSymbols[col] = grid[row][col];
             }
-            Optional<Symbol> result = checkLine(rowSymbols);
+            Optional<Symbol> result = checkLineWinner(rowSymbols);
             if (result.isPresent()) {
                 return result;
             }
         }
 
         // check col
-        for (int col = 0; col < BOARD_SIZE; col++) {
-            Symbol[] colSymbols = new Symbol[BOARD_SIZE];
-            for (int row = 0; row < BOARD_SIZE; row++) {
+        for (int col = 0; col < size; col++) {
+            Symbol[] colSymbols = new Symbol[size];
+            for (int row = 0; row < size; row++) {
                 colSymbols[row] = grid[row][col];
             }
-            Optional<Symbol> result = checkLine(colSymbols);
+            Optional<Symbol> result = checkLineWinner(colSymbols);
             if (result.isPresent()) {
                 return result;
             }
         }
 
         // check diag (top-left to bottom-right)
-        Symbol[] diag1 = new Symbol[BOARD_SIZE];
-        for (int i = 0; i < BOARD_SIZE; i++) {
+        Symbol[] diag1 = new Symbol[size];
+        for (int i = 0; i < size; i++) {
             diag1[i] = grid[i][i];
         }
-        Optional<Symbol> result = checkLine(diag1);
+        Optional<Symbol> result = checkLineWinner(diag1);
         if (result.isPresent()) {
             return result;
         }
 
         // check diag (top-right to bottom-left)
-        Symbol[] diag2 = new Symbol[BOARD_SIZE];
-        for (int i = 0; i < BOARD_SIZE; i++) {
-            diag2[i] = grid[i][BOARD_SIZE - 1 - i];
+        Symbol[] diag2 = new Symbol[size];
+        for (int i = 0; i < size; i++) {
+            diag2[i] = grid[i][size - 1 - i];
         }
-        result = checkLine(diag2);
+        result = checkLineWinner(diag2);
         if (result.isPresent()) {
             return result;
         }
@@ -109,8 +131,8 @@ public class Board {
         return Optional.empty();
     }
 
-    private Optional<Symbol> checkLine(Symbol... symbols) {
-        if (symbols.length != BOARD_SIZE) {
+    private Optional<Symbol> checkLineWinner(Symbol... symbols) {
+        if (symbols.length != size) {
             return Optional.empty();
         }
 
@@ -119,7 +141,7 @@ public class Board {
             return Optional.empty();
         }
 
-        for (int i = 1; i < BOARD_SIZE; i++) {
+        for (int i = 1; i < size; i++) {
             if (symbols[i] != firstSymbol) {
                 return Optional.empty();
             }
@@ -127,71 +149,7 @@ public class Board {
         return Optional.of(firstSymbol);
     }
 
-    public String getDisplayString() {
-        StringBuilder stringBuilder = new StringBuilder();
-        stringBuilder.append(buildColumnHeader());
-        for (int row = 0; row < BOARD_SIZE; row++) {
-            stringBuilder.append(buildRow(row));
-            if (row < BOARD_SIZE - 1) {
-                stringBuilder.append(buildSeparator());
-            }
-        }
-        return stringBuilder.toString();
-    }
-
-    private String buildColumnHeader() {
-        StringBuilder stringBuilder = new StringBuilder("   ");
-        for (int col = 0; col < BOARD_SIZE; col++) {
-            stringBuilder.append((char)('a' + col));
-            if (col < BOARD_SIZE - 1) {
-                stringBuilder.append("   ");
-            }
-        }
-        return stringBuilder.append(" \n").toString();
-    }
-
-    private String buildRow(int row) {
-        StringBuilder stringBuilder = new StringBuilder();
-        stringBuilder.append(row + 1).append("  ");
-        for (int col = 0; col < BOARD_SIZE; col++) {
-            stringBuilder.append(grid[row][col]);
-            if (col < BOARD_SIZE - 1) {
-                stringBuilder.append(" | ");
-            }
-        }
-        return stringBuilder.append(" \n").toString();
-    }
-
-    private String buildSeparator() {
-        return "  -----------\n";
-    }
-
-    /**
-     * Parses user input coordinate string to board indices.
-     *
-     * @param input the coordinate string (e.g., "2c" for row 2, column c)
-     * @return an {@link Optional} containing the row and column indices [row, col]
-     *         if valid, or {@link Optional#empty()} if invalid
-     */
-    public Optional<int[]> parseCoordinate(String input) {
-        if (input.length() != 2) {
-            return Optional.empty();
-        }
-
-        char rowChar = input.charAt(0);
-        char colChar = input.charAt(1);
-
-        int rowIndex = rowChar - '1';
-        int colIndex = colChar - 'a';
-
-        if (rowIndex < 0 || rowIndex >= BOARD_SIZE || colIndex < 0 || colIndex >= BOARD_SIZE) {
-            return Optional.empty();
-        }
-
-        return Optional.of(new int[]{rowIndex, colIndex});
-    }
-
-    Symbol getSymbol(int row, int col) {
+    public Symbol getSymbol(int row, int col) {
         return grid[row][col];
     }
 }

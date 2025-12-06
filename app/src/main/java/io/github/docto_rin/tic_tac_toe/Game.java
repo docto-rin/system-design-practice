@@ -1,65 +1,35 @@
 package io.github.docto_rin.tic_tac_toe;
 
-import java.io.PrintStream;
-import java.util.Scanner;
-import java.util.Optional;
+import io.github.docto_rin.tic_tac_toe.view.BoardView;
 
 public class Game {
     private Board board;
     private Player[] players;
     private int currentPlayerIndex;
+    private BoardView boardView;
 
-    public Game(Player player1, Player player2) {
+    public Game(Player player1, Player player2, BoardView boardView) {
         board = new Board();
         players = new Player[]{player1, player2};
         currentPlayerIndex = 0;
+        this.boardView = boardView;
     }
 
-    public void play(Scanner scanner, PrintStream output) {
-
+    public void play() {
         while (true) {
-            output.print(board.getDisplayString());
+            boardView.display(board);
             Player player = players[currentPlayerIndex];
-            output.printf("It's %s (%s)'s turn next.%n",
-                player.getName(),
-                player.getSymbol()
-            );
 
-            output.println("Enter coordinate:");
-            String inputStr;
-            Optional<int[]> coordinate;
-            do {
-                inputStr = scanner.nextLine();
-
-                coordinate = board.parseCoordinate(inputStr);
-                if (coordinate.isEmpty()) {
-                    output.println("Invalid input. Try again.");
-                    continue;
-                }
-
-                boolean moveResult = board.makeMove(
-                    coordinate.get()[0], coordinate.get()[1], player.getSymbol()
-                );
-                if (!moveResult) {
-                    output.printf("The cell (%s) is already occupied. Try again.%n", inputStr);
-                    continue;
-                }
-
-                break;
-            } while (true);
+            int[] coordinate = boardView.getNextMove(board, player);
+            board.putSymbol(coordinate[0], coordinate[1], player.getSymbol());
 
             if (board.checkWinner().isPresent()) {
-                output.print(board.getDisplayString());
-                output.printf("Game! The winner is %s (%s).%n",
-                    player.getName(),
-                    player.getSymbol()
-                );
+                boardView.displayWinner(board, player);
                 break;
             }
 
             if (board.isFull()) {
-                output.print(board.getDisplayString());
-                output.println("The board is full. It's a draw.");
+                boardView.displayDraw(board);
                 break;
             }
 
